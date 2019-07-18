@@ -35,20 +35,31 @@ dat$capelast <- dat$nomcapital / dat$nomoutput
 dat$labelast <- dat$nomlabor / dat$nomoutput
 dat$gamma <- 1-dat$capelast-dat$labelast
 
+## format year
+dat$year <- as.numeric(substr(dat$DATE,1,regexpr("-",dat$DATE)-1))
+
+## Compute log(constant)
+
+dat$F0 <- -1*dat$capelast*log(dat$cap[dat$year==2012]) - dat$labelast*log(dat$labor[dat$year==2012])
+
+##dat$F0 <- 0
+
 ## compute productivity
-dat$prod <- log(dat$output) - dat$capelast*log(dat$cap) -
-  dat$labelast*log(dat$labor)
+dat$prod <- log(dat$output) -
+  dat$capelast*log(dat$cap) -
+  dat$labelast*log(dat$labor) - dat$F0
 
 ## compute (nominal) prices for inputs
 dat$wage <- (dat$nomlabor / dat$labor)
 dat$capprice <- (dat$nomcapital / dat$cap)
 
-dat$c0 <- log(dat$nomoutput) + log(dat$gamma) - (1/dat$gamma)*dat$prod
+dat$c0 <- log(dat$nomoutput) + log(dat$gamma) -
+  (1/dat$gamma)*dat$prod
 
 
 ## cost of productivity for current productivity level.
 dat$nomprod <- dat$c0 + (1/dat$gamma)*dat$prod
-dat$year <- as.numeric(substr(dat$DATE,1,regexpr("-",dat$DATE)-1))
+
 
 ## cost of productivity for productivity level in 2012.
 dat$costprod <- dat$c0 + (1/dat$gamma)*dat$prod[dat$year==2012]
@@ -76,6 +87,8 @@ dat$part.output <- dat$gamma*log(dat$output)
 dat$part.cost <- -1*dat$gamma*(1-dat$gamma)*(dat$c0 - log(dat$gamma))
 dat$part.cap <- dat$gamma*dat$capelast*log(dat$capprice/dat$capelast)
 dat$part.lab <- dat$gamma*dat$labelast*log(dat$wage/dat$labelast)
-dat$part.noncost <- dat$part.output + dat$part.cap + dat$part.lab
+dat$part.tech <- -1*dat$gamma*dat$F0
+dat$part.noncost <- dat$part.output + dat$part.cap + dat$part.lab + dat$part.tech
+
 
 write.csv(dat, file="factprod_data.csv", row.names=FALSE)

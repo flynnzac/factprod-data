@@ -188,6 +188,7 @@ dat$part.output.ind <- dat$part.output - dat$part.output[dat$year==2012]
 dat$part.lab.ind <- dat$part.lab - dat$part.lab[dat$year==2012]
 dat$part.cap.ind <- dat$part.cap - dat$part.cap[dat$year==2012]
 dat$part.cost.ind <- dat$part.cost - dat$part.cost[dat$year==2012]
+dat$part.tech.ind <- dat$part.tech - dat$part.tech[dat$year==2012]
 dat$part.noncost.ind <- dat$part.noncost - dat$part.noncost[dat$year==2012]
 
 
@@ -272,6 +273,26 @@ png("../figures/decomp_cost.png",width=1024,height=1024)
 print(costpartplot)
 dev.off()
 
+techpartplot <- xyplot(exp(-1*part.tech.ind)~year, data=dat, type="l", col="black",
+                         xlab="Year", ylab="Technical Progress in Using Labor and Capital", lwd=3, cex=3,
+                         lty="dashed",
+                         panel=function(...)
+                         {
+                           panel.lines(...)
+                           panel.lines(dat$year, exp(-1*smooth(dat$part.tech.ind)), lwd=7, lty="solid", col="black")
+                           panel.abline(h=1.0, lwd=3, lty="dotted",col="black")
+                         },
+                         scales=list(y=list(at=seq(from=0.92,to=1.04,by=0.01)),
+                                     x=list(at=seq(from=1987,to=2016,by=3))), ylim=c(0.92,1.04))
+
+
+techpartplot <- update(techpartplot, par.settings=set)
+
+png("../figures/decomp_tech.png",width=1024,height=1024)
+print(techpartplot)
+dev.off()
+
+
 noncostpartplot <- xyplot(exp(part.noncost.ind)~year, data=dat, type="l", col="black",
                          xlab="Year", ylab="Non price of productivity part of productivity", lwd=3, cex=3,
                          lty="dashed",
@@ -300,6 +321,9 @@ prod.share.cap <- (dat$part.cap[nrow(dat)] - dat$part.cap[1])/ (dat$year[nrow(da
 
 prod.share.cost <- (dat$part.cost[nrow(dat)] - dat$part.cost[1])/ (dat$year[nrow(dat)] - dat$year[1])
 
+prod.share.tech <- (dat$part.tech[nrow(dat)] - dat$part.tech[1])/ (dat$year[nrow(dat)] - dat$year[1])
+
+
 ## 1987 - 2005
 
 prod.share.prod.pre <- (dat$prod[dat$year==2005] - dat$prod[1])/(2005-dat$year[1])
@@ -312,17 +336,35 @@ prod.share.cap.pre <- (dat$part.cap[dat$year==2005] - dat$part.cap[1])/(2005-dat
 
 prod.share.cost.pre <- (dat$part.cost[dat$year==2005] - dat$part.cost[1])/(2005-dat$year[1])
 
-## 2006 -
-
-prod.share.prod.post <- (dat$prod[nrow(dat)] - dat$prod[dat$year==2006])/(dat$year[nrow(dat)] - 2006)
-
-prod.share.output.post <- (dat$part.output[nrow(dat)] - dat$part.output[dat$year==2006])/(dat$year[nrow(dat)] - 2006)
-
-prod.share.lab.post <- (dat$part.lab[nrow(dat)] - dat$part.lab[dat$year==2006])/(dat$year[nrow(dat)] - 2006)
-
-prod.share.cap.post <- (dat$part.cap[nrow(dat)] - dat$part.cap[dat$year==2006])/(dat$year[nrow(dat)] - 2006)
-
-prod.share.cost.post <- (dat$part.cost[nrow(dat)] - dat$part.cost[dat$year==2006])/(dat$year[nrow(dat)] - 2006)
+prod.share.tech.pre <- (dat$part.tech[dat$year==2005] - dat$part.tech[1])/(2005-dat$year[1])
 
 
+## 2005 -
 
+prod.share.prod.post <- (dat$prod[nrow(dat)] - dat$prod[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+prod.share.output.post <- (dat$part.output[nrow(dat)] - dat$part.output[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+prod.share.lab.post <- (dat$part.lab[nrow(dat)] - dat$part.lab[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+prod.share.cap.post <- (dat$part.cap[nrow(dat)] - dat$part.cap[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+prod.share.cost.post <- (dat$part.cost[nrow(dat)] - dat$part.cost[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+prod.share.tech.post <- (dat$part.tech[nrow(dat)] - dat$part.tech[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+
+### If effective wage and rental rate grew at same rate, productivity would be
+### (keeping the decline in growth rate of technical progress, cost of
+### productivity, and demand trends constant):
+
+part.lab.prime <- (dat$year[nrow(dat)] - 2005)*prod.share.lab.pre +
+  dat$part.lab[dat$year==2005]
+
+part.cap.prime <- (dat$year[nrow(dat)] - 2005)*prod.share.cap.pre +
+  dat$part.cap[dat$year==2005]
+
+part.prod.prime <- dat$part.cost[nrow(dat)] + dat$part.output[nrow(dat)]+
+  part.lab.prime + part.cap.prime + dat$part.tech[nrow(dat)]
+
+prod.share.prod.post.prime <- (part.prod.prime - dat$prod[dat$year==2005]) / (dat$year[nrow(dat)]-2005)
