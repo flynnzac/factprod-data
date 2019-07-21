@@ -16,6 +16,8 @@ set$par.ylab.text$font <- 1
 set$par.ylab.text$fontfamily <- "serif"
 
 
+## Figures
+
 prodplot <- xyplot(exp(prodind)~year, data=dat, type="l", col="black", xlab="Year",
                    ylab="Productivity (2012=1.0)", lwd=3, cex=3,
                    lty="dashed",
@@ -95,14 +97,6 @@ dev.off()
 
 
 
-costprodplot <- xyplot(exp(costprodind)~year, data=dat, type="l", col="black", xlab="Year", ylab="Real Cost of 2012 Productivity (2012=1.0)", lwd=7, cex=3,
-               scales=list(y=list(at=seq(from=0.0,to=8,by=0.25)),
-                           x=list(at=seq(from=1987,to=2016,by=3))))
-
-png("../figures/costprod.png")
-print(costprodplot)
-dev.off()
-
 c0plot <- xyplot(exp(c0ind)~year, data=dat, type="l", col="black", xlab="Year", ylab="Real Wage of Productivity (2012=1.0)", lwd=7, cex=3,
                scales=list(y=list(at=seq(from=0.0,to=8,by=0.25)),
                            x=list(at=seq(from=1987,to=2016,by=3))))
@@ -135,10 +129,10 @@ png("../figures/labelast.png", width=1024, height=1024)
 print(labelastplot)
 dev.off()
 
-labpriceplot <- xyplot(I(exp(log(wage/cpi)-log(wage[year==2012]/cpi[year==2012])))~year, data=dat, type="l", col="black",
-                    xlab="Year", ylab="Real Labor Price (2012 = 1.0)", lwd=7, cex=3,
-               scales=list(y=list(at=seq(from=0.8,to=1.2,by=0.04)),
-                           x=list(at=seq(from=1987,to=2016,by=3))), ylim=c(0.8,1.1),
+labpriceplot <- xyplot(I(exp(log(wage)-log(wage[year==2012])))~year, data=dat, type="l", col="black",
+                    xlab="Year", ylab="Labor Price (2012 = 1.0)", lwd=7, cex=3,
+               scales=list(y=list(at=seq(from=0.2,to=1.2,by=0.1)),
+                           x=list(at=seq(from=1987,to=2016,by=3))), ylim=c(0.2,1.2),
                panel=function(...)
                {
                  panel.lines(...)
@@ -152,10 +146,10 @@ png("../figures/labprice.png", width=1024, height=1024)
 print(labpriceplot)
 dev.off()
 
-cappriceplot <- xyplot(I(exp(log(capprice/cpi)-log(capprice[year==2012]/cpi[year==2012])))~year, data=dat, type="l", col="black",
-                    xlab="Year", ylab="Real Capital Price (2012 = 1.0)", lwd=7, cex=3,
-               scales=list(y=list(at=seq(from=0.8,to=1.5,by=0.04)),
-                           x=list(at=seq(from=1987,to=2016,by=3))), ylim=c(0.85,1.4),
+cappriceplot <- xyplot(I(exp(log(capprice)-log(capprice[year==2012])))~year, data=dat, type="l", col="black",
+                    xlab="Year", ylab="Capital Price (2012 = 1.0)", lwd=7, cex=3,
+               scales=list(y=list(at=seq(from=0.2,to=1.2,by=0.1)),
+                           x=list(at=seq(from=1987,to=2016,by=3))), ylim=c(0.2,1.2),
                panel=function(...)
                {
                  panel.lines(...)
@@ -181,6 +175,8 @@ capelastplot <- update(capelastplot, par.settings=set)
 png("../figures/capelast.png", width=1024, height=1024)
 print(capelastplot)
 dev.off()
+
+
 
 ## decomposition plots
 
@@ -273,13 +269,13 @@ png("../figures/decomp_cost.png",width=1024,height=1024)
 print(costpartplot)
 dev.off()
 
-techpartplot <- xyplot(exp(-1*part.tech.ind)~year, data=dat, type="l", col="black",
+techpartplot <- xyplot(exp(part.tech.ind)~year, data=dat, type="l", col="black",
                          xlab="Year", ylab="Technical Progress in Using Labor and Capital", lwd=3, cex=3,
                          lty="dashed",
                          panel=function(...)
                          {
                            panel.lines(...)
-                           panel.lines(dat$year, exp(-1*smooth(dat$part.tech.ind)), lwd=7, lty="solid", col="black")
+                           panel.lines(dat$year, exp(smooth(dat$part.tech.ind)), lwd=7, lty="solid", col="black")
                            panel.abline(h=1.0, lwd=3, lty="dotted",col="black")
                          },
                          scales=list(y=list(at=seq(from=0.92,to=1.04,by=0.01)),
@@ -354,9 +350,7 @@ prod.share.cost.post <- (dat$part.cost[nrow(dat)] - dat$part.cost[dat$year==2005
 prod.share.tech.post <- (dat$part.tech[nrow(dat)] - dat$part.tech[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
 
 
-### If effective wage and rental rate grew at same rate, productivity would be
-### (keeping the decline in growth rate of technical progress, cost of
-### productivity, and demand trends constant):
+## If effective wage and rental rate grew at same rate, productivity would be
 
 part.lab.prime <- (dat$year[nrow(dat)] - 2005)*prod.share.lab.pre +
   dat$part.lab[dat$year==2005]
@@ -368,3 +362,25 @@ part.prod.prime <- dat$part.cost[nrow(dat)] + dat$part.output[nrow(dat)]+
   part.lab.prime + part.cap.prime + dat$part.tech[nrow(dat)]
 
 prod.share.prod.post.prime <- (part.prod.prime - dat$prod[dat$year==2005]) / (dat$year[nrow(dat)]-2005)
+
+
+## If baseline technology grew at the same rate
+
+part.tech.prime <- (dat$year[nrow(dat)] - 2005)*prod.share.tech.pre + dat$part.tech[dat$year==2005]
+
+part.prod.prime.tech <- dat$part.cost[nrow(dat)] +
+  dat$part.output[nrow(dat)] + dat$part.lab[nrow(dat)] +
+  dat$part.cap[nrow(dat)] + part.tech.prime
+
+prod.share.prod.post.prime.tech <- (part.prod.prime.tech - dat$prod[dat$year==2005])/(dat$year[nrow(dat)] - 2005)
+
+
+## If no acceleration in productivity cost decline
+
+part.cost.prime <- (dat$year[nrow(dat)] - 2005)*prod.share.cost.pre + dat$part.cost[dat$year==2005]
+
+part.prod.prime.cost <- part.cost.prime +
+  dat$part.output[nrow(dat)] + dat$part.lab[nrow(dat)] +
+  dat$part.cap[nrow(dat)] + dat$part.tech[nrow(dat)]
+
+prod.share.prod.post.prime.cost <- (part.prod.prime.cost - dat$prod[dat$year==2005])/(dat$year[nrow(dat)] - 2005)

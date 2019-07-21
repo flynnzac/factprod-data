@@ -38,11 +38,9 @@ dat$gamma <- 1-dat$capelast-dat$labelast
 ## format year
 dat$year <- as.numeric(substr(dat$DATE,1,regexpr("-",dat$DATE)-1))
 
-## Compute log(constant)
+## Compute log(F_0) (the normalizing constant)
 
 dat$F0 <- -1*dat$capelast*log(dat$cap[dat$year==2012]) - dat$labelast*log(dat$labor[dat$year==2012])
-
-##dat$F0 <- 0
 
 ## compute productivity
 dat$prod <- log(dat$output) -
@@ -57,13 +55,6 @@ dat$c0 <- log(dat$nomoutput) + log(dat$gamma) -
   (1/dat$gamma)*dat$prod
 
 
-## cost of productivity for current productivity level.
-dat$nomprod <- dat$c0 + (1/dat$gamma)*dat$prod
-
-
-## cost of productivity for productivity level in 2012.
-dat$costprod <- dat$c0 + (1/dat$gamma)*dat$prod[dat$year==2012]
-
 ## labor productivity
 dat$labprod <- dat$output / dat$labor
 dat$capprod <- dat$output / dat$cap
@@ -71,7 +62,6 @@ dat$prodprod <- dat$output / exp(dat$prod)
 
 dat$outputind <- log(dat$output) - log(dat$labor) - ((log(dat$output)-log(dat$labor))[dat$year==2012])
 dat$prodind <- dat$prod - dat$prod[dat$year==2012]
-dat$costprodind <- dat$costprod - dat$costprod[dat$year==2012]
 dat$c0ind <- dat$c0 - dat$c0[dat$year==2012]
 dat$wageind <- log(dat$wage) - log(dat$wage[dat$year==2012])
 dat$cappriceind <- log(dat$capprice) - log(dat$capprice[dat$year==2012])
@@ -81,8 +71,6 @@ dat$labelastind <- log(dat$labelast) - log(dat$labelast[dat$year==2012])
 
 ## components of productivity
 
-## a = gamma*q - gamma*(1-gamma)*log(co) + gamma*(1-gamma)*log(gamma) + gamma*theta(L)*log(W(L)/theta(L)) + gamma*theta(K)*log(W(K)/theta(K))
-## gamma*(1-gamma)*log(c0) = gamma*q + gamma*(1-gamma)*log(gamma) + gamma*theta(L)*log(W(L)/theta(L)) + gamma*theta(K)*log(W(K)/theta(K))
 dat$part.output <- dat$gamma*log(dat$output)
 dat$part.cost <- -1*dat$gamma*(1-dat$gamma)*(dat$c0 - log(dat$gamma))
 dat$part.cap <- dat$gamma*dat$capelast*log(dat$capprice/dat$capelast)
